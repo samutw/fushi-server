@@ -11,7 +11,7 @@
 # hibiki 的发布序号（与 app 同一条单调序列）。
 #
 # 用法：
-#   gh workflow run release.yml -R hajisensai/fushi-server -f channel=beta -f source_ref=develop
+#   gh workflow run release.yml -R samutw/fushi-server -f channel=beta -f source_ref=develop
 name: release
 
 on:

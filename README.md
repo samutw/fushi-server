@@ -14,12 +14,17 @@
 | 漫画整卷 OCR | 客户端上传卷，服务端跑 ONNX 检测+识别，回传 mokuro |
 | 字幕识别（ASR） | 客户端上传音轨或指定 host 视频，服务端转录成 SRT + token 时间轴 |
 | 代下载 | 内置 libtorrent 引擎或外接 qBittorrent，落盘后自动入库 |
-| 内容订阅 | 订阅在 host 上创建、周期检查（Nyaa / apibay / Knaben / Torznab）并投进下载管线 |
+| 内容订阅 | 订阅在 host 上创建、周期检查（用户添加的 BT 站 / Torznab）并投进下载管线 |
+| Anki 落地 | 手机的待发卡经互联写进服务端的 Anki 再同步 |
+| 配置文件（Profile）寄存 | 设备上传配置方案到服务端寄存，另一台设备拉走；默认关（`profile_transfer`） |
+| 远程访问 | 公网地址集、iroh P2P 隧道与自建中继（`p2p` / `p2p_relays`），WebUI 改完即生效 |
+| AI 助手会话 | 已配对设备可把 AI 助手会话交给服务端跑；默认关（`ai.agent_for_peers`） |
 | WebUI / admin API | `http(s)://<host>:38780/`：状态、配对 PIN、库根、上传、任务、下载、模型、设置、日志 |
+| `ctl` 命令 | `fushi_server ctl …` 经 admin API 操作正在运行的 `serve`（库、扫描、下载、订阅、模型、Anki、分块上传、`logs -f`） |
 
 ## 下载
 
-到 [Releases](https://github.com/hajisensai/fushi-server/releases) 取：
+到本仓 [Releases](../../releases) 取：
 
 | 资产 | 平台 |
 |---|---|
@@ -28,7 +33,9 @@
 
 - `v<version>-beta.<seq>`（prerelease）= 测试版；`v<version>` = 正式版（Latest）。
 - 包里已含 sqlite3、内置 torrent 引擎（Linux 静态链 libtorrent，零运行库依赖）、
-  onnxruntime 1.22.0 CPU 版。目标机**不需要**装 libtorrent / openssl。
+  onnxruntime 1.22.0 CPU 版，以及几个只依赖 libc 的 Rust 库：互联 P2P 隧道 `fushi_p2p`、
+  SRS 排程 `fushi_fsrs`、计算内核 `fushi_compute`、RWKV 排程推理 `fushi_rwkv`
+  （AGPL-3.0-or-later）。目标机**不需要**装 libtorrent / openssl。
 - 运行期只需 `ffmpeg` / `ffprobe`（视频封面抽帧、ASR 音轨解码、下载后转封装）；不在 PATH
   时在配置里写 `ffmpeg:` / `ffprobe:` 路径。
 
@@ -59,8 +66,8 @@ bin/fushi_server serve --scan        # 起服务 + 首次扫描
 发 Release。零 PAT、零 secret，源码只在 monorepo 一份。
 
 ```bash
-gh workflow run release.yml -R hajisensai/fushi-server -f channel=beta   -f source_ref=develop
-gh workflow run release.yml -R hajisensai/fushi-server -f channel=formal -f source_ref=develop
+gh workflow run release.yml -R samutw/fushi-server -f channel=beta   -f source_ref=develop
+gh workflow run release.yml -R samutw/fushi-server -f channel=formal -f source_ref=develop
 ```
 
 版本号取 hibiki 的 `packages/fushi_server/pubspec.yaml`，与 app 版本独立；`<seq>` 是 hibiki
